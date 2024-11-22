@@ -101,17 +101,18 @@ function FormCard({ options }: FormCardProps) {
   const setSelection = useFormStore((state) => state.setSelection)
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
+    <div className="flex flex-wrap justify-center">
       {options.map((option) => (
-        <OptionCard
-          key={option.id}
-          title={option.title}
-          description={option.description}
-          icon={option.icon}
-          image={option.image}
-          selected={selections[currentStep] === option.id}
-          onClick={() => setSelection(currentStep, option.id)}
-        />
+        <div className="w-1/2 md:w-1/4 p-2" key={option.id}>
+          <OptionCard
+            title={option.title}
+            description={option.description}
+            icon={option.icon}
+            image={option.image}
+            selected={selections[currentStep] === option.id}
+            onClick={() => setSelection(currentStep, option.id)}
+          />
+        </div>
       ))}
     </div>
   )
@@ -183,11 +184,11 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
 
     return (
       <div ref={ref} className={`flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4 ${className}`} {...props}>
-        <div className="w-full max-w-md">
-          <Card className="w-full max-w-4xl mx-auto p-6 shadow-lg">
+        <div className="w-full max-w-5xl">
+          <Card className="w-full mx-auto p-6 shadow-lg">
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-[72px]">
+                <div className="w-10">
                   {currentStep > 0 && (
                     <Button
                       variant="link"
@@ -204,7 +205,7 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
                     {title}
                   </div>
                 )}
-                <div className="text-sm font-medium text-muted-foreground w-[72px] text-right">
+                <div className="text-sm font-medium text-muted-foreground w-10 text-right">
                   {currentStep + 1}/{formSteps.length}
                 </div>
               </div>
