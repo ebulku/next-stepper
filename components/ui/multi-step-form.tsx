@@ -5,6 +5,7 @@ import { ChevronLeftIcon, LucideIcon } from 'lucide-react'
 import Image from 'next/image'
 import * as React from 'react'
 import { create } from 'zustand'
+import { cn } from "@/lib/utils"
 
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -43,7 +44,7 @@ export type FormItem = {
   title: string
   description?: string
   icon?: LucideIcon
-  image: string
+  image?: string
   validNextSteps?: string[]
 }
 
@@ -51,7 +52,7 @@ interface OptionCardProps {
   title: string
   description?: string
   icon?: LucideIcon
-  image: string
+  image?: string
   selected?: boolean
   onClick?: () => void
 }
@@ -66,21 +67,30 @@ function OptionCard({
 }: OptionCardProps) {
   return (
     <Card
-      className={`relative overflow-hidden cursor-pointer transition-all hover:ring-2 hover:ring-primary ${
-        selected ? 'ring-2 ring-primary' : ''
-      }`}
+      className={cn(
+        "relative overflow-hidden cursor-pointer transition-all hover:ring-2 hover:ring-primary",
+        selected && "ring-2 ring-primary"
+      )}
       onClick={onClick}
     >
-      <div className="relative h-32">
-        <Image
-          src={image}
-          alt={title}
-          fill
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0" />
-        {Icon && <Icon className="absolute bottom-3 left-3 h-6 w-6 text-white" />}
-      </div>
+      {image ? (
+        <div className="relative h-32">
+          <Image
+            src={image}
+            alt={title}
+            fill
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0" />
+          {Icon && <Icon className="absolute bottom-3 left-3 h-6 w-6 text-white" />}
+        </div>
+      ) : (
+        Icon && (
+          <div className="flex items-center justify-center h-32 bg-muted">
+            <Icon className="h-12 w-12 text-muted-foreground" />
+          </div>
+        )
+      )}
       <div className="p-4">
         <h3 className="font-semibold">{title}</h3>
         {description && (
@@ -100,20 +110,48 @@ function FormCard({ options }: FormCardProps) {
   const selections = useFormStore((state) => state.selections)
   const setSelection = useFormStore((state) => state.setSelection)
 
+  const visualOptions = options.filter(option => option.image || option.icon)
+  const textOptions = options.filter(option => !option.image && !option.icon)
+
   return (
-    <div className="flex flex-wrap justify-center">
-      {options.map((option) => (
-        <div className="w-1/2 md:w-1/4 p-2" key={option.id}>
-          <OptionCard
-            title={option.title}
-            description={option.description}
-            icon={option.icon}
-            image={option.image}
-            selected={selections[currentStep] === option.id}
-            onClick={() => setSelection(currentStep, option.id)}
-          />
+    <div className="space-y-2">
+      {visualOptions.length > 0 && (
+        <div className="flex flex-wrap justify-center">
+          {visualOptions.map((option) => (
+            <div 
+              className={cn("w-1/2 md:w-1/4 p-2")}
+              key={option.id}
+            >
+              <OptionCard
+                title={option.title}
+                description={option.description}
+                icon={option.icon}
+                image={option.image}
+                selected={selections[currentStep] === option.id}
+                onClick={() => setSelection(currentStep, option.id)}
+              />
+            </div>
+          ))}
         </div>
-      ))}
+      )}
+      
+      {textOptions.length > 0 && (
+        <div className="flex flex-wrap justify-center">
+          {textOptions.map((option) => (
+            <div 
+              className={cn("w-full md:w-1/2 p-2")}
+              key={option.id}
+            >
+              <OptionCard
+                title={option.title}
+                description={option.description}
+                selected={selections[currentStep] === option.id}
+                onClick={() => setSelection(currentStep, option.id)}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
