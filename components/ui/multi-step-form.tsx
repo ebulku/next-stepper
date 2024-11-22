@@ -46,16 +46,16 @@ export type FormStep = {
 export type FormItem = {
   id: string
   title: string
-  description: string
-  icon: LucideIcon
+  description?: string
+  icon?: LucideIcon
   image: string
   validNextSteps?: string[]
 }
 
 interface OptionCardProps {
   title: string
-  description: string
-  icon: LucideIcon
+  description?: string
+  icon?: LucideIcon
   image: string
   selected?: boolean
   onClick?: () => void
@@ -84,11 +84,13 @@ function OptionCard({
           className="object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0" />
-        <Icon className="absolute bottom-3 left-3 h-6 w-6 text-white" />
+        {Icon && <Icon className="absolute bottom-3 left-3 h-6 w-6 text-white" />}
       </div>
       <div className="p-4">
         <h3 className="font-semibold">{title}</h3>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        {description && (
+          <p className="text-sm text-muted-foreground">{description}</p>
+        )}
       </div>
     </Card>
   )
