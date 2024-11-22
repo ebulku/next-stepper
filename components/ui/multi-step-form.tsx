@@ -9,30 +9,24 @@ import { create } from 'zustand'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { Switch } from '@/components/ui/switch'
 
 interface FormState {
   currentStep: number
   selections: Record<number, string>
-  autoProgress: boolean
   setStep: (step: number) => void
   setSelection: (step: number, optionId: string) => void
-  setAutoProgress: (enabled: boolean) => void
   resetForm: () => void
 }
 
 const useFormStore = create<FormState>((set) => ({
   currentStep: 0,
   selections: {},
-  autoProgress: true,
   setStep: (step) => set({ currentStep: step }),
   setSelection: (step, optionId) =>
     set((state) => ({
       selections: { ...state.selections, [step]: optionId },
-      currentStep:
-        state.autoProgress && step < 2 ? step + 1 : state.currentStep,
+      currentStep: step < 2 ? step + 1 : state.currentStep,
     })),
-  setAutoProgress: (enabled) => set({ autoProgress: enabled }),
   resetForm: () => set({ currentStep: 0, selections: {} }),
 }))
 
@@ -125,18 +119,15 @@ function FormCard({ options }: FormCardProps) {
 export interface MultiStepFormProps extends React.HTMLAttributes<HTMLDivElement> {
   formSteps: FormStep[]
   onComplete?: (selections: Record<number, string>) => void
-  showAutoProgress?: boolean
   className?: string
 }
 
 const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
-  ({ formSteps, onComplete, showAutoProgress = true, className, ...props }, ref) => {
+  ({ formSteps, onComplete, className, ...props }, ref) => {
     const { 
       currentStep,
       setStep,
-      selections,
-      autoProgress,
-      setAutoProgress
+      selections
     } = useFormStore()
 
     const canProceed = selections[currentStep] !== undefined
@@ -198,17 +189,6 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
                 <h1 className="text-3xl font-bold">
                   {stepOptions.title}
                 </h1>
-                {showAutoProgress && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">
-                      Auto-progress
-                    </span>
-                    <Switch
-                      checked={autoProgress}
-                      onCheckedChange={setAutoProgress}
-                    />
-                  </div>
-                )}
               </div>
               <Progress
                 value={((currentStep + 1) / formSteps.length) * 100}
