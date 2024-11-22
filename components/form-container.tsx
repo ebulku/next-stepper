@@ -1,6 +1,6 @@
 'use client'
 
-import { GlobeIcon, CodeIcon, ShoppingCartIcon, BlocksIcon, LayersIcon, BoxesIcon, CloudIcon, ServerIcon, BoxIcon } from 'lucide-react'
+import { GlobeIcon, CodeIcon, ShoppingCartIcon, BlocksIcon, LayersIcon, BoxesIcon, CloudIcon, ServerIcon, BoxIcon, Code2Icon } from 'lucide-react'
 import MultiStepForm, { type FormStep } from '@/components/ui/multi-step-form'
 
 const formSteps: FormStep[] = [
@@ -8,6 +8,7 @@ const formSteps: FormStep[] = [
     level: 1,
     id: 'project-type',
     title: 'Select Your Project Type',
+    description: 'What type of project are you working on?',
     items: [
       {
         id: 'website',
@@ -39,6 +40,7 @@ const formSteps: FormStep[] = [
     level: 2,
     id: 'framework',
     title: 'Choose Framework',
+    description: 'Select the framework that fits your project best',
     items: [
       {
         id: 'nextjs',
@@ -86,6 +88,7 @@ const formSteps: FormStep[] = [
     level: 3,
     id: 'deployment',
     title: 'Pick Your Deployment',
+    description: 'Select the deployment platform that fits your needs best',
     items: [
       {
         id: 'vercel',
@@ -141,6 +144,12 @@ export default function FormContainer() {
 
   return (
     <MultiStepForm
+      title={
+        <div className="flex items-center gap-2">
+          <Code2Icon className="h-5 w-5" />
+          <span className="font-semibold">Next-Stepper</span>
+        </div>
+      }
       formSteps={formSteps}
       onComplete={handleComplete}
       // className="min-h-screen"

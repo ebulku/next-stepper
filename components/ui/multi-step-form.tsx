@@ -1,7 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, ArrowRight, LucideIcon } from 'lucide-react'
+import { ChevronLeftIcon, LucideIcon } from 'lucide-react'
 import Image from 'next/image'
 import * as React from 'react'
 import { create } from 'zustand'
@@ -34,6 +34,7 @@ export type FormStep = {
   level: number
   id: string
   title: string
+  description?: string
   items: FormItem[]
 }
 
@@ -116,28 +117,28 @@ function FormCard({ options }: FormCardProps) {
   )
 }
 
-export interface MultiStepFormProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface MultiStepFormProps {
   formSteps: FormStep[]
   onComplete?: (selections: Record<number, string>) => void
   className?: string
+  title?: React.ReactNode
+  ref?: React.Ref<HTMLDivElement>
 }
 
 const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
-  ({ formSteps, onComplete, className, ...props }, ref) => {
+  ({ formSteps, onComplete, className = '', title, ...props }, ref) => {
     const { 
       currentStep,
       setStep,
       selections
     } = useFormStore()
 
-    const canProceed = selections[currentStep] !== undefined
     const isLastStep = currentStep === formSteps.length - 1
+    const canFinish = isLastStep && selections[currentStep] !== undefined
 
-    const handleNext = () => {
-      if (isLastStep) {
+    const handleFinish = () => {
+      if (canFinish) {
         onComplete?.(selections)
-      } else if (currentStep < formSteps.length - 1) {
-        setStep(currentStep + 1)
       }
     }
 
@@ -185,15 +186,42 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
         <div className="w-full max-w-md">
           <Card className="w-full max-w-4xl mx-auto p-6 shadow-lg">
             <div className="mb-8">
-              <div className="flex justify-between items-center mb-4">
-                <h1 className="text-3xl font-bold">
-                  {stepOptions.title}
-                </h1>
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-[72px]">
+                  {currentStep > 0 && (
+                    <Button
+                      variant="link"
+                      onClick={handleBack}
+                      className="mr-4 p-0"
+                    >
+                      <ChevronLeftIcon className="h-5 w-5" />
+                      Back
+                    </Button>
+                  )}
+                </div>
+                {title && (
+                  <div className="flex items-center">
+                    {title}
+                  </div>
+                )}
+                <div className="text-sm font-medium text-muted-foreground w-[72px] text-right">
+                  {currentStep + 1}/{formSteps.length}
+                </div>
               </div>
               <Progress
                 value={((currentStep + 1) / formSteps.length) * 100}
                 className="h-2"
               />
+              <div className="mt-4 text-center">
+                <h1 className="text-2xl font-semibold mb-2">
+                  {stepOptions.title}
+                </h1>
+                {formSteps[currentStep]?.description && (
+                  <p className="text-sm text-muted-foreground mx-auto max-w-md">
+                    {formSteps[currentStep].description}
+                  </p>
+                )}
+              </div>
             </div>
 
             <AnimatePresence mode="wait">
@@ -208,20 +236,16 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
               </motion.div>
             </AnimatePresence>
 
-            <div className="flex justify-between mt-8">
-              <Button
-                onClick={handleBack}
-                disabled={currentStep === 0}
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back
-              </Button>
-              <Button onClick={handleNext} disabled={!canProceed}>
-                {isLastStep ? 'Finish' : 'Next'}
-                {!isLastStep && (
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                )}
-              </Button>
-            </div>
+            {isLastStep && (
+              <div className="flex justify-end mt-8">
+                <Button 
+                  onClick={handleFinish} 
+                  disabled={!canFinish}
+                >
+                  Finish
+                </Button>
+              </div>
+            )}
           </Card>
         </div>
       </div>
