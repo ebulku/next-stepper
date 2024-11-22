@@ -1,7 +1,8 @@
 'use client'
 
-import { GlobeIcon, CodeIcon, ShoppingCartIcon, BlocksIcon, LayersIcon, BoxesIcon, CloudIcon, ServerIcon, BoxIcon, Code2Icon } from 'lucide-react'
+import { GlobeIcon, CodeIcon, BlocksIcon, LayersIcon, BoxesIcon, CloudIcon, ServerIcon, BoxIcon, Code2Icon } from 'lucide-react'
 import MultiStepForm, { type FormStep } from '@/components/ui/multi-step-form'
+import { toast } from "sonner"
 
 const formSteps: FormStep[] = [
   {
@@ -142,8 +143,22 @@ const formSteps: FormStep[] = [
 
 export default function FormContainer() {
   const handleComplete = (selections: Record<number, string>) => {
-    console.log('Form completed with selections:', selections)
-    // Here you can handle the form submission
+    const selectedItems = formSteps.map((step, index) => {
+      const selectedItem = step.items.find(item => item.id === selections[index])
+      return {
+        [step.id]: selectedItem?.id
+      }
+    }).reduce((acc, curr) => ({ ...acc, ...curr }), {})
+
+    toast('Form completed!', {
+      description: (
+        <pre className="mt-2 p-4 bg-muted rounded-lg overflow-auto">
+          <code className="text-sm">
+            {JSON.stringify(selectedItems, null, 2)}
+          </code>
+        </pre>
+      )
+    })
   }
 
   return (
