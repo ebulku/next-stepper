@@ -11,26 +11,30 @@ const formSteps: FormStep[] = [
     description: 'What type of project are you working on?',
     items: [
       {
-        id: 'website',
-        title: 'Website',
-        description: 'Create a beautiful, responsive website for your business or portfolio',
-        icon: GlobeIcon,
-        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop',
-        validNextSteps: ['nextjs', 'astro']
+        id: 'custom',
+        title: 'Custom',
+        description: 'This is a Card with no image or icon',
+        validNextSteps: ['nextjs', 'astro', 'remix', 'next-commerce']
       },
       {
         id: 'webapp',
         title: 'Web Application',
-        description: 'Build a full-featured web application with authentication and database',
+        description: 'This is a Card with only icon',
         icon: CodeIcon,
-        image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2370&auto=format&fit=crop',
         validNextSteps: ['nextjs', 'remix']
+      },
+      {
+        id: 'website',
+        title: 'Website',
+        description: 'Card with icon & image',
+        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop',
+        icon: GlobeIcon,
+        validNextSteps: ['nextjs', 'astro']
       },
       {
         id: 'ecommerce',
         title: 'E-commerce',
-        description: 'Set up an online store with product management and payment processing',
-        icon: ShoppingCartIcon,
+        description: 'This is a Card with only image',
         image: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?q=80&w=2370&auto=format&fit=crop',
         validNextSteps: ['shopify', 'next-commerce']
       }
