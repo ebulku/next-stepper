@@ -1,12 +1,18 @@
 import { LucideIcon } from 'lucide-react'
 import { create } from 'zustand'
 
+export type StepOptions = {
+  title: string
+  options: FormOption[]
+}
+
 export type FormOption = {
   id: string
   title: string
   description: string
   icon: LucideIcon
   image: string
+  next?: StepOptions
 }
 
 type FormState = {
