@@ -2,6 +2,12 @@
 
 A dynamic multi-step form built with **Next.js** and styled using [shadcn/ui](https://ui.shadcn.com/). This project showcases how to create smooth, step-based workflows with modern components and responsive design.
 
+## Preview
+
+<div align="center">
+  <img src="https://api.microlink.io/?url=https%3A%2F%2Fnext-stepper.vercel.app%2F&overlay.browser=dark&overlay.background=linear-gradient%28225deg%2C+%23FF057C+0%25%2C+%238D0B93+50%25%2C+%23321575+100%25%29&screenshot=true&embed=screenshot.url" alt="Home Page" style="max-width: 100%;" >
+</div>
+
 ## Features
 
 - 🎯 Dynamic multi-step navigation with progress tracking
