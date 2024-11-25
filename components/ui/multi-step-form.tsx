@@ -172,70 +172,100 @@ function OptionCard({
 interface FormCardProps {
   options: FormItem[]
   variant?: 'default' | 'compact'
-  totalSteps: number
+  totalSteps?: number
   cardClassName?: string
   imageClassName?: string
   iconClassName?: string
 }
 
-function FormCard({
-  options,
-  variant = 'default',
-  totalSteps,
-  cardClassName,
-  imageClassName,
-  iconClassName,
-}: FormCardProps) {
-  const currentStep = useFormStore((state) => state.currentStep)
-  const selections = useFormStore((state) => state.selections)
-  const setSelection = useFormStore((state) => state.setSelection)
-  const visualOptions = options.filter((option) => option.image || option.icon)
-  const textOptions = options.filter((option) => !option.image && !option.icon)
+const FormCard = React.forwardRef<HTMLDivElement, FormCardProps>(
+  (
+    {
+      options,
+      variant = 'default',
+      cardClassName,
+      imageClassName,
+      iconClassName,
+      totalSteps,
+    },
+    ref
+  ) => {
+    const currentStep = useFormStore((state) => state.currentStep)
+    const selections = useFormStore((state) => state.selections)
+    const setSelection = useFormStore((state) => state.setSelection)
+    const visualOptions = options.filter(
+      (option) => option.image || option.icon
+    )
+    const textOptions = options.filter(
+      (option) => !option.image && !option.icon
+    )
+    const [selectedId, setSelectedId] = React.useState<string | null>(null)
+    const [isSelecting, setIsSelecting] = React.useState(false)
 
-  return (
-    <div className="space-y-2">
-      {visualOptions.length > 0 && (
-        <div className="flex flex-wrap justify-center">
-          {visualOptions.map((option) => (
-            <div className="w-1/2 md:w-1/4 p-2" key={option.id}>
-              <OptionCard
-                title={option.title}
-                description={option.description}
-                icon={option.icon}
-                image={option.image}
-                selected={selections[currentStep] === option.id}
-                onClick={() => setSelection(currentStep, option.id, totalSteps)}
-                variant={variant}
-                cardClassName={cardClassName}
-                imageClassName={imageClassName}
-                iconClassName={iconClassName}
-              />
-            </div>
-          ))}
-        </div>
-      )}
+    const handleSelection = React.useCallback(
+      (optionId: string) => {
+        if (isSelecting) return
+        setIsSelecting(true)
+        setSelectedId(optionId)
+        setSelection(currentStep, optionId, totalSteps || 0)
+        setTimeout(() => {
+          setIsSelecting(false)
+        }, 300)
+      },
+      [currentStep, isSelecting, setSelection, totalSteps]
+    )
 
-      {textOptions.length > 0 && (
-        <div className="flex flex-wrap justify-center">
-          {textOptions.map((option) => (
-            <div className="w-full p-2" key={option.id}>
-              <OptionCard
-                title={option.title}
-                description={option.description}
-                selected={selections[currentStep] === option.id}
-                onClick={() => setSelection(currentStep, option.id, totalSteps)}
-                variant={variant}
-                cardClassName={cardClassName}
-                imageClassName={imageClassName}
-                iconClassName={iconClassName}
-              />
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
+    return (
+      <div className="space-y-2">
+        {visualOptions.length > 0 && (
+          <div className="flex flex-wrap justify-center">
+            {visualOptions.map((option) => (
+              <div className="w-1/2 md:w-1/4 p-2" key={option.id}>
+                <OptionCard
+                  title={option.title}
+                  description={option.description}
+                  icon={option.icon}
+                  image={option.image}
+                  selected={
+                    selectedId === option.id ||
+                    selections[currentStep] === option.id
+                  }
+                  onClick={() => handleSelection(option.id)}
+                  variant={variant}
+                  cardClassName={cardClassName}
+                  imageClassName={imageClassName}
+                  iconClassName={iconClassName}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {textOptions.length > 0 && (
+          <div className="flex flex-wrap justify-center">
+            {textOptions.map((option) => (
+              <div className="w-full p-2" key={option.id}>
+                <OptionCard
+                  title={option.title}
+                  description={option.description}
+                  selected={
+                    selectedId === option.id ||
+                    selections[currentStep] === option.id
+                  }
+                  onClick={() => handleSelection(option.id)}
+                  variant={variant}
+                  cardClassName={cardClassName}
+                  imageClassName={imageClassName}
+                  iconClassName={iconClassName}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+)
 
 interface StepOptions {
   title: string
@@ -443,13 +473,13 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
               </div>
             </div>
 
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={currentStep}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.15 }}
                 className="h-full"
               >
                 {showSuccess ? (
@@ -464,6 +494,7 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
                     cardClassName={cardClassName}
                     imageClassName={imageClassName}
                     iconClassName={iconClassName}
+                    key={`form-card-${currentStep}`}
                   />
                 ) : null}
               </motion.div>
