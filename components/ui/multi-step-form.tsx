@@ -307,15 +307,18 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
     return (
       <div
         ref={ref}
-        className={`flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4 ${className}`}
+        className={cn(
+          'flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4',
+          className
+        )}
         {...props}
       >
         <div className="w-full max-w-5xl">
-          <Card className="w-full mx-auto p-6 shadow-lg">
+          <Card className="w-full mx-auto p-6 shadow-lg min-h-[800px] md:min-h-[600px]">
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-10">
-                  {currentStep > 0 && (
+                <div className="w-20">
+                  {currentStep > 0 ? (
                     <Button
                       variant="link"
                       onClick={handleBack}
@@ -324,10 +327,17 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
                       <ChevronLeftIcon className="h-5 w-5" />
                       Back
                     </Button>
+                  ) : (
+                    <div className="invisible">
+                      <Button variant="link" className="mr-4 p-0">
+                        <ChevronLeftIcon className="h-5 w-5" />
+                        Back
+                      </Button>
+                    </div>
                   )}
                 </div>
                 {title && <div className="flex items-center">{title}</div>}
-                <div className="text-sm font-medium text-muted-foreground w-10 text-right">
+                <div className="text-sm font-medium text-muted-foreground w-20 text-right">
                   {currentStep + 1}/{formSteps.length}
                 </div>
               </div>
@@ -354,6 +364,7 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
+                className="h-full"
               >
                 <FormCard
                   options={stepOptions.options}
