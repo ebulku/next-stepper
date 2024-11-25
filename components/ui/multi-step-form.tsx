@@ -12,24 +12,32 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 
-interface FormState {
+interface FormStore {
   currentStep: number
-  selections: Record<number, string>
+  selections: Record<number | string, string>
   setStep: (step: number) => void
-  setSelection: (step: number, optionId: string, totalSteps: number) => void
-  resetForm: () => void
+  setSelection: (step: number, selection: string, totalSteps: number) => void
+  reset: () => void
+  hasForm: boolean
 }
 
-const useFormStore = create<FormState>((set) => ({
+const useFormStore = create<FormStore>((set) => ({
   currentStep: 0,
   selections: {},
   setStep: (step) => set({ currentStep: step }),
-  setSelection: (step, optionId, totalSteps) =>
-    set((state) => ({
-      selections: { ...state.selections, [step]: optionId },
-      currentStep: step < totalSteps - 1 ? step + 1 : state.currentStep,
-    })),
-  resetForm: () => set({ currentStep: 0, selections: {} }),
+  setSelection: (step, selection, totalSteps) =>
+    set((state) => {
+      const newSelections = { ...state.selections, [step]: selection }
+      // Stay on last step unless we have a form
+      const nextStep =
+        step === totalSteps - 1 ? (state.hasForm ? totalSteps : step) : step + 1
+      return {
+        selections: newSelections,
+        currentStep: nextStep,
+      }
+    }),
+  reset: () => set({ currentStep: 0, selections: {} }),
+  hasForm: false,
 }))
 
 export type FormStep = {
@@ -37,7 +45,14 @@ export type FormStep = {
   id: string
   title: string
   description?: string
-  items: FormItem[]
+  items: Array<{
+    id: string
+    title: string
+    description?: string
+    image?: string
+    icon?: LucideIcon
+    validNextSteps?: string[]
+  }>
 }
 
 export type FormItem = {
@@ -222,54 +237,92 @@ function FormCard({
   )
 }
 
+interface StepOptions {
+  title: string
+  options: FormStep['items']
+}
+
 export interface MultiStepFormProps {
+  title?: React.ReactNode
   formSteps: FormStep[]
-  onComplete?: (selections: Record<number, string>) => void
-  className?: string
+  onComplete: (selections: Record<number | string, string>) => boolean
+  variant?: 'default' | 'compact'
   cardClassName?: string
   imageClassName?: string
   iconClassName?: string
-  title?: React.ReactNode
-  variant?: 'default' | 'compact'
-  ref?: React.Ref<HTMLDivElement>
+  children?: React.ReactNode
+  finalStep?: React.ReactNode
+  className?: string
 }
 
 const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
   (
     {
+      title,
       formSteps,
       onComplete,
-      className = '',
+      variant = 'default',
       cardClassName,
       imageClassName,
       iconClassName,
-      title,
-      variant = 'default',
+      children,
+      finalStep,
+      className,
       ...props
     },
     ref
   ) => {
-    const { currentStep, setStep, selections } = useFormStore()
+    const { currentStep, setStep, selections, hasForm } = useFormStore()
+    const [canFinish, setCanFinish] = React.useState(false)
+    const [showSuccess, setShowSuccess] = React.useState(false)
 
-    const isLastStep = currentStep === formSteps.length - 1
-    const canFinish = isLastStep && selections[currentStep] !== undefined
-
-    const handleFinish = () => {
-      if (canFinish) {
-        onComplete?.(selections)
-      }
-    }
+    // Set hasForm on mount
+    React.useEffect(() => {
+      useFormStore.setState({ hasForm: Boolean(children) })
+    }, [children])
 
     const handleBack = () => {
+      if (showSuccess) {
+        setShowSuccess(false)
+        return
+      }
       if (currentStep > 0) {
         setStep(currentStep - 1)
       }
     }
 
+    const handleFinish = () => {
+      if (onComplete && canFinish) {
+        if (children) {
+          setStep(formSteps.length)
+        } else if (finalStep) {
+          const isValid = onComplete(selections)
+          if (isValid) {
+            setShowSuccess(true)
+          }
+        } else {
+          onComplete(selections)
+        }
+      }
+    }
+
+    const getFormInputs = () => {
+      const inputs = document.querySelectorAll('input, textarea') as NodeListOf<
+        HTMLInputElement | HTMLTextAreaElement
+      >
+      const formData: Record<string, string> = {}
+      inputs.forEach((input) => {
+        if (input.name && input.value) {
+          formData[input.name] = input.value
+        }
+      })
+      return formData
+    }
+
     const getStepOptions = (
       currentStep: number,
-      selections: Record<number, string>
-    ) => {
+      selections: Record<number | string, string>
+    ): StepOptions | null => {
       const step = formSteps[currentStep]
       if (!step) return null
 
@@ -300,9 +353,34 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
       }
     }
 
+    const isLastStep = currentStep === formSteps.length - 1
+    const isSuccessStep = currentStep === formSteps.length
     const stepOptions = getStepOptions(currentStep, selections)
+    const hasLastStepSelection = selections[formSteps.length - 1] !== undefined
 
-    if (!stepOptions) return null
+    const handleComplete = () => {
+      if (finalStep) {
+        // If no form, just use selections and show success
+        const isValid = onComplete(selections)
+        if (isValid) {
+          setShowSuccess(true)
+        }
+      } else {
+        onComplete(selections)
+      }
+    }
+
+    const shouldShowOptions =
+      stepOptions && (!isSuccessStep || (!children && !finalStep))
+    const shouldShowComplete =
+      isLastStep && !showSuccess && hasLastStepSelection && !children
+
+    React.useEffect(() => {
+      if (isLastStep) {
+        const hasSelection = selections[currentStep] !== undefined
+        setCanFinish(hasSelection)
+      }
+    }, [isLastStep, currentStep, selections])
 
     return (
       <div
@@ -338,17 +416,25 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
                 </div>
                 {title && <div className="flex items-center">{title}</div>}
                 <div className="text-sm font-medium text-muted-foreground w-20 text-right">
-                  {currentStep + 1}/{formSteps.length}
+                  {isSuccessStep
+                    ? `${formSteps.length}/${formSteps.length}`
+                    : `${currentStep + 1}/${formSteps.length}`}
                 </div>
               </div>
               <Progress
-                value={((currentStep + 1) / formSteps.length) * 100}
+                value={
+                  isSuccessStep
+                    ? 100
+                    : ((currentStep + 1) / formSteps.length) * 100
+                }
                 className="h-2"
               />
               <div className="mt-4 text-center">
-                <h1 className="text-2xl font-semibold mb-2">
-                  {stepOptions.title}
-                </h1>
+                {!isSuccessStep && stepOptions && (
+                  <h1 className="text-2xl font-semibold mb-2">
+                    {stepOptions.title}
+                  </h1>
+                )}
                 {formSteps[currentStep]?.description && (
                   <p className="text-sm text-muted-foreground mx-auto max-w-md">
                     {formSteps[currentStep].description}
@@ -366,21 +452,36 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
                 transition={{ duration: 0.3 }}
                 className="h-full"
               >
-                <FormCard
-                  options={stepOptions.options}
-                  variant={variant}
-                  totalSteps={formSteps.length}
-                  cardClassName={cardClassName}
-                  imageClassName={imageClassName}
-                  iconClassName={iconClassName}
-                />
+                {showSuccess ? (
+                  finalStep
+                ) : isSuccessStep && children ? (
+                  children
+                ) : shouldShowOptions ? (
+                  <FormCard
+                    options={stepOptions?.options || []}
+                    variant={variant}
+                    totalSteps={formSteps.length}
+                    cardClassName={cardClassName}
+                    imageClassName={imageClassName}
+                    iconClassName={iconClassName}
+                  />
+                ) : null}
               </motion.div>
             </AnimatePresence>
 
-            {isLastStep && (
+            {/* Show Complete button when we have no form */}
+            {shouldShowComplete && (
               <div className="flex justify-end mt-8">
-                <Button onClick={handleFinish} disabled={!canFinish}>
-                  Finish
+                <Button onClick={handleComplete} disabled={!canFinish}>
+                  Complete
+                </Button>
+              </div>
+            )}
+            {/* Show Submit/Complete button on form step */}
+            {isSuccessStep && !showSuccess && children && (
+              <div className="flex justify-end mt-8">
+                <Button onClick={handleComplete}>
+                  {finalStep ? 'Submit' : 'Complete'}
                 </Button>
               </div>
             )}

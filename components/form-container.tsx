@@ -184,7 +184,7 @@ const formSteps: FormStep[] = [
 export default function FormContainer() {
   const [isCompact, setIsCompact] = useState(false)
 
-  const handleComplete = (selections: Record<number, string>) => {
+  const handleComplete = (selections: Record<string | number, string>) => {
     const selectedItems = formSteps
       .map((step, index) => {
         const selectedItem = step.items.find(
@@ -205,6 +205,8 @@ export default function FormContainer() {
         </pre>
       ),
     })
+
+    return true
   }
 
   return (
