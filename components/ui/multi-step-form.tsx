@@ -191,7 +191,7 @@ function FormCard({
                 selected={selections[currentStep] === option.id}
                 onClick={() => setSelection(currentStep, option.id, totalSteps)}
                 variant={variant}
-                className={cardClassName}
+                cardClassName={cardClassName}
                 imageClassName={imageClassName}
                 iconClassName={iconClassName}
               />
@@ -210,7 +210,7 @@ function FormCard({
                 selected={selections[currentStep] === option.id}
                 onClick={() => setSelection(currentStep, option.id, totalSteps)}
                 variant={variant}
-                className={cardClassName}
+                cardClassName={cardClassName}
                 imageClassName={imageClassName}
                 iconClassName={iconClassName}
               />
