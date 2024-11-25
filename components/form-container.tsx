@@ -9,11 +9,15 @@ import {
   CodeIcon,
   GlobeIcon,
   LayersIcon,
+  PencilIcon,
   ServerIcon,
 } from 'lucide-react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
+import { Label } from '@/components/ui/label'
 import MultiStepForm, { type FormStep } from '@/components/ui/multi-step-form'
+import { Switch } from '@/components/ui/switch'
 
 const formSteps: FormStep[] = [
   {
@@ -51,6 +55,15 @@ const formSteps: FormStep[] = [
         image:
           'https://images.unsplash.com/photo-1472851294608-062f824d29cc?q=80&w=2370&auto=format&fit=crop',
         validNextSteps: ['shopify', 'next-commerce'],
+      },
+      {
+        id: 'blog',
+        title: 'Blog',
+        description: 'Another Sample',
+        icon: PencilIcon,
+        image:
+          'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=2370&auto=format&fit=crop',
+        validNextSteps: ['nextjs', 'astro'],
       },
     ],
   },
@@ -169,6 +182,8 @@ const formSteps: FormStep[] = [
 ]
 
 export default function FormContainer() {
+  const [isCompact, setIsCompact] = useState(false)
+
   const handleComplete = (selections: Record<number, string>) => {
     const selectedItems = formSteps
       .map((step, index) => {
@@ -193,16 +208,29 @@ export default function FormContainer() {
   }
 
   return (
-    <MultiStepForm
-      title={
-        <div className="flex items-center gap-2">
-          <Code2Icon className="h-5 w-5" />
-          <span className="font-semibold">Next-Stepper</span>
-        </div>
-      }
-      formSteps={formSteps}
-      onComplete={handleComplete}
-      // variant="compact"
-    />
+    <div className="container mx-auto">
+      <MultiStepForm
+        title={
+          <div className="flex items-center justify-between w-full flex-col space-y-4">
+            <div className="flex items-center gap-2">
+              <Code2Icon className="h-6 w-6" />
+              <span className="font-semibold">Next Vista</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Label className="text-sm font-medium">Default</Label>
+              <Switch
+                id="compact-mode"
+                checked={isCompact}
+                onCheckedChange={setIsCompact}
+              />
+              <Label className="text-sm font-medium">Compact</Label>
+            </div>
+          </div>
+        }
+        formSteps={formSteps}
+        onComplete={handleComplete}
+        variant={isCompact ? 'compact' : 'default'}
+      />
+    </div>
   )
 }

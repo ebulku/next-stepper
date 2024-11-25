@@ -135,7 +135,7 @@ function OptionCard({
             Icon && (
               <div
                 className={cn(
-                  'flex items-center justify-center h-32 bg-muted',
+                  'flex items-center justify-center h-48 bg-muted',
                   imageClassName
                 )}
               >
