@@ -45,14 +45,7 @@ export type FormStep = {
   id: string
   title: string
   description?: string
-  items: Array<{
-    id: string
-    title: string
-    description?: string
-    image?: string
-    icon?: LucideIcon
-    validNextSteps?: string[]
-  }>
+  items: FormItem[]
 }
 
 export type FormItem = {
@@ -77,97 +70,104 @@ interface OptionCardProps {
   iconClassName?: string
 }
 
-function OptionCard({
-  title,
-  description,
-  icon: Icon,
-  image,
-  selected,
-  onClick,
-  variant = 'default',
-  cardClassName,
-  imageClassName,
-  iconClassName,
-}: OptionCardProps) {
-  return (
-    <Card
-      className={cn(
-        'relative overflow-hidden cursor-pointer transition-all hover:ring-2 hover:ring-primary',
-        selected && 'ring-2 ring-primary',
-        cardClassName
-      )}
-      onClick={onClick}
-    >
-      {variant === 'default' ? (
-        <>
-          {image ? (
-            <div className={cn('relative h-32', imageClassName)}>
-              <Image src={image} alt={title} fill className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0" />
-              {Icon && (
-                <Icon
+const OptionCard = React.forwardRef<HTMLDivElement, OptionCardProps>(
+  (
+    {
+      title,
+      description,
+      icon: Icon,
+      image,
+      selected,
+      onClick,
+      variant = 'default',
+      cardClassName,
+      imageClassName,
+      iconClassName,
+    },
+    ref
+  ) => {
+    return (
+      <Card
+        ref={ref}
+        className={cn(
+          'relative overflow-hidden cursor-pointer transition-all hover:ring-2 hover:ring-primary',
+          selected && 'ring-2 ring-primary',
+          cardClassName
+        )}
+        onClick={onClick}
+      >
+        {variant === 'default' ? (
+          <>
+            {image ? (
+              <div className={cn('relative h-32', imageClassName)}>
+                <Image src={image} alt={title} fill className="object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0" />
+                {Icon && (
+                  <Icon
+                    className={cn(
+                      'absolute bottom-3 left-3 h-6 w-6 text-white',
+                      iconClassName
+                    )}
+                  />
+                )}
+              </div>
+            ) : (
+              Icon && (
+                <div
                   className={cn(
-                    'absolute bottom-3 left-3 h-6 w-6 text-white',
-                    iconClassName
+                    'flex items-center justify-center h-32 bg-muted',
+                    imageClassName
                   )}
-                />
+                >
+                  <Icon
+                    className={cn(
+                      'h-12 w-12 text-muted-foreground',
+                      iconClassName
+                    )}
+                  />
+                </div>
+              )
+            )}
+            <div className="p-4">
+              <h3 className="font-semibold">{title}</h3>
+              {description && (
+                <p className="text-sm text-muted-foreground">{description}</p>
               )}
             </div>
-          ) : (
-            Icon && (
-              <div
-                className={cn(
-                  'flex items-center justify-center h-32 bg-muted',
-                  imageClassName
-                )}
-              >
-                <Icon
-                  className={cn(
-                    'h-12 w-12 text-muted-foreground',
-                    iconClassName
-                  )}
-                />
-              </div>
-            )
-          )}
-          <div className="p-4">
-            <h3 className="font-semibold">{title}</h3>
-            {description && (
-              <p className="text-sm text-muted-foreground">{description}</p>
-            )}
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="p-2">
-            <h3 className="font-semibold text-center">{title}</h3>
-          </div>
-          {image ? (
-            <div className={cn('relative h-48', imageClassName)}>
-              <Image src={image} alt={title} fill className="object-cover" />
+          </>
+        ) : (
+          <>
+            <div className="p-2">
+              <h3 className="font-semibold text-center">{title}</h3>
             </div>
-          ) : (
-            Icon && (
-              <div
-                className={cn(
-                  'flex items-center justify-center h-48 bg-muted',
-                  imageClassName
-                )}
-              >
-                <Icon
-                  className={cn(
-                    'h-12 w-12 text-muted-foreground',
-                    iconClassName
-                  )}
-                />
+            {image ? (
+              <div className={cn('relative h-48', imageClassName)}>
+                <Image src={image} alt={title} fill className="object-cover" />
               </div>
-            )
-          )}
-        </>
-      )}
-    </Card>
-  )
-}
+            ) : (
+              Icon && (
+                <div
+                  className={cn(
+                    'flex items-center justify-center h-48 bg-muted',
+                    imageClassName
+                  )}
+                >
+                  <Icon
+                    className={cn(
+                      'h-12 w-12 text-muted-foreground',
+                      iconClassName
+                    )}
+                  />
+                </div>
+              )
+            )}
+          </>
+        )}
+      </Card>
+    )
+  }
+)
+OptionCard.displayName = 'OptionCard'
 
 interface FormCardProps {
   options: FormItem[]
@@ -216,7 +216,7 @@ const FormCard = React.forwardRef<HTMLDivElement, FormCardProps>(
     )
 
     return (
-      <div className="space-y-2">
+      <div className="space-y-2" ref={ref}>
         {visualOptions.length > 0 && (
           <div className="flex flex-wrap justify-center">
             {visualOptions.map((option) => (
@@ -266,6 +266,7 @@ const FormCard = React.forwardRef<HTMLDivElement, FormCardProps>(
     )
   }
 )
+FormCard.displayName = 'FormCard'
 
 interface StepOptions {
   title: string
@@ -302,7 +303,7 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
     },
     ref
   ) => {
-    const { currentStep, setStep, selections, hasForm } = useFormStore()
+    const { currentStep, setStep, selections } = useFormStore()
     const [canFinish, setCanFinish] = React.useState(false)
     const [showSuccess, setShowSuccess] = React.useState(false)
 
@@ -319,34 +320,6 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
       if (currentStep > 0) {
         setStep(currentStep - 1)
       }
-    }
-
-    const handleFinish = () => {
-      if (onComplete && canFinish) {
-        if (children) {
-          setStep(formSteps.length)
-        } else if (finalStep) {
-          const isValid = onComplete(selections)
-          if (isValid) {
-            setShowSuccess(true)
-          }
-        } else {
-          onComplete(selections)
-        }
-      }
-    }
-
-    const getFormInputs = () => {
-      const inputs = document.querySelectorAll('input, textarea') as NodeListOf<
-        HTMLInputElement | HTMLTextAreaElement
-      >
-      const formData: Record<string, string> = {}
-      inputs.forEach((input) => {
-        if (input.name && input.value) {
-          formData[input.name] = input.value
-        }
-      })
-      return formData
     }
 
     const getStepOptions = (
@@ -522,7 +495,6 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
     )
   }
 )
-
 MultiStepForm.displayName = 'MultiStepForm'
 
 export default MultiStepForm
