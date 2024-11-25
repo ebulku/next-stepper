@@ -5,7 +5,8 @@ import { ChevronLeftIcon, LucideIcon } from 'lucide-react'
 import Image from 'next/image'
 import * as React from 'react'
 import { create } from 'zustand'
-import { cn } from "@/lib/utils"
+
+import { cn } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -15,7 +16,7 @@ interface FormState {
   currentStep: number
   selections: Record<number, string>
   setStep: (step: number) => void
-  setSelection: (step: number, optionId: string) => void
+  setSelection: (step: number, optionId: string, totalSteps: number) => void
   resetForm: () => void
 }
 
@@ -23,10 +24,10 @@ const useFormStore = create<FormState>((set) => ({
   currentStep: 0,
   selections: {},
   setStep: (step) => set({ currentStep: step }),
-  setSelection: (step, optionId) =>
+  setSelection: (step, optionId, totalSteps) =>
     set((state) => ({
       selections: { ...state.selections, [step]: optionId },
-      currentStep: step < 2 ? step + 1 : state.currentStep,
+      currentStep: step < totalSteps - 1 ? step + 1 : state.currentStep,
     })),
   resetForm: () => set({ currentStep: 0, selections: {} }),
 }))
@@ -55,6 +56,7 @@ interface OptionCardProps {
   image?: string
   selected?: boolean
   onClick?: () => void
+  variant?: 'default' | 'compact'
 }
 
 function OptionCard({
@@ -64,89 +66,105 @@ function OptionCard({
   image,
   selected,
   onClick,
+  variant = 'default',
 }: OptionCardProps) {
   return (
     <Card
       className={cn(
-        "relative overflow-hidden cursor-pointer transition-all hover:ring-2 hover:ring-primary",
-        selected && "ring-2 ring-primary"
+        'relative overflow-hidden cursor-pointer transition-all hover:ring-2 hover:ring-primary',
+        selected && 'ring-2 ring-primary'
       )}
       onClick={onClick}
     >
-      {image ? (
-        <div className="relative h-32">
-          <Image
-            src={image}
-            alt={title}
-            fill
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0" />
-          {Icon && <Icon className="absolute bottom-3 left-3 h-6 w-6 text-white" />}
-        </div>
-      ) : (
-        Icon && (
-          <div className="flex items-center justify-center h-32 bg-muted">
-            <Icon className="h-12 w-12 text-muted-foreground" />
+      {variant === 'default' ? (
+        <>
+          {image ? (
+            <div className="relative h-32">
+              <Image src={image} alt={title} fill className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0" />
+              {Icon && (
+                <Icon className="absolute bottom-3 left-3 h-6 w-6 text-white" />
+              )}
+            </div>
+          ) : (
+            Icon && (
+              <div className="flex items-center justify-center h-32 bg-muted">
+                <Icon className="h-12 w-12 text-muted-foreground" />
+              </div>
+            )
+          )}
+          <div className="p-4">
+            <h3 className="font-semibold">{title}</h3>
+            {description && (
+              <p className="text-sm text-muted-foreground">{description}</p>
+            )}
           </div>
-        )
+        </>
+      ) : (
+        <>
+          <div className="p-2">
+            <h3 className="font-semibold text-center">{title}</h3>
+          </div>
+          {image ? (
+            <div className="relative h-48">
+              <Image src={image} alt={title} fill className="object-cover" />
+            </div>
+          ) : (
+            Icon && (
+              <div className="flex items-center justify-center h-32 bg-muted">
+                <Icon className="h-12 w-12 text-muted-foreground" />
+              </div>
+            )
+          )}
+        </>
       )}
-      <div className="p-4">
-        <h3 className="font-semibold">{title}</h3>
-        {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
-        )}
-      </div>
     </Card>
   )
 }
 
 interface FormCardProps {
   options: FormItem[]
+  variant?: 'default' | 'compact'
+  totalSteps: number
 }
 
-function FormCard({ options }: FormCardProps) {
+function FormCard({ options, variant = 'default', totalSteps }: FormCardProps) {
   const currentStep = useFormStore((state) => state.currentStep)
   const selections = useFormStore((state) => state.selections)
   const setSelection = useFormStore((state) => state.setSelection)
-
-  const visualOptions = options.filter(option => option.image || option.icon)
-  const textOptions = options.filter(option => !option.image && !option.icon)
+  const visualOptions = options.filter((option) => option.image || option.icon)
+  const textOptions = options.filter((option) => !option.image && !option.icon)
 
   return (
     <div className="space-y-2">
       {visualOptions.length > 0 && (
         <div className="flex flex-wrap justify-center">
           {visualOptions.map((option) => (
-            <div 
-              className={cn("w-1/2 md:w-1/4 p-2")}
-              key={option.id}
-            >
+            <div className="w-1/2 md:w-1/4 p-2" key={option.id}>
               <OptionCard
                 title={option.title}
                 description={option.description}
                 icon={option.icon}
                 image={option.image}
                 selected={selections[currentStep] === option.id}
-                onClick={() => setSelection(currentStep, option.id)}
+                onClick={() => setSelection(currentStep, option.id, totalSteps)}
+                variant={variant}
               />
             </div>
           ))}
         </div>
       )}
-      
+
       {textOptions.length > 0 && (
         <div className="flex flex-wrap justify-center">
           {textOptions.map((option) => (
-            <div 
-              className={cn("w-full md:w-1/2 p-2")}
-              key={option.id}
-            >
+            <div className="w-full p-2" key={option.id}>
               <OptionCard
                 title={option.title}
                 description={option.description}
                 selected={selections[currentStep] === option.id}
-                onClick={() => setSelection(currentStep, option.id)}
+                onClick={() => setSelection(currentStep, option.id, totalSteps)}
+                variant={variant}
               />
             </div>
           ))}
@@ -161,16 +179,23 @@ export interface MultiStepFormProps {
   onComplete?: (selections: Record<number, string>) => void
   className?: string
   title?: React.ReactNode
+  variant?: 'default' | 'compact'
   ref?: React.Ref<HTMLDivElement>
 }
 
 const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
-  ({ formSteps, onComplete, className = '', title, ...props }, ref) => {
-    const { 
-      currentStep,
-      setStep,
-      selections
-    } = useFormStore()
+  (
+    {
+      formSteps,
+      onComplete,
+      className = '',
+      title,
+      variant = 'default',
+      ...props
+    },
+    ref
+  ) => {
+    const { currentStep, setStep, selections } = useFormStore()
 
     const isLastStep = currentStep === formSteps.length - 1
     const canFinish = isLastStep && selections[currentStep] !== undefined
@@ -187,14 +212,17 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
       }
     }
 
-    const getStepOptions = (currentStep: number, selections: Record<number, string>) => {
+    const getStepOptions = (
+      currentStep: number,
+      selections: Record<number, string>
+    ) => {
       const step = formSteps[currentStep]
       if (!step) return null
 
       if (currentStep === 0) {
         return {
           title: step.title,
-          options: step.items
+          options: step.items,
         }
       }
 
@@ -202,17 +230,19 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
       if (!previousSelection) return null
 
       const previousStep = formSteps[currentStep - 1]
-      const previousOption = previousStep.items.find(item => item.id === previousSelection)
+      const previousOption = previousStep.items.find(
+        (item) => item.id === previousSelection
+      )
       if (!previousOption) return null
 
       const validNextSteps = previousOption.validNextSteps || []
-      const availableOptions = step.items.filter(item => 
+      const availableOptions = step.items.filter((item) =>
         validNextSteps.includes(item.id)
       )
 
       return {
         title: step.title,
-        options: availableOptions
+        options: availableOptions,
       }
     }
 
@@ -221,7 +251,11 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
     if (!stepOptions) return null
 
     return (
-      <div ref={ref} className={`flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4 ${className}`} {...props}>
+      <div
+        ref={ref}
+        className={`flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4 ${className}`}
+        {...props}
+      >
         <div className="w-full max-w-5xl">
           <Card className="w-full mx-auto p-6 shadow-lg">
             <div className="mb-8">
@@ -238,11 +272,7 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
                     </Button>
                   )}
                 </div>
-                {title && (
-                  <div className="flex items-center">
-                    {title}
-                  </div>
-                )}
+                {title && <div className="flex items-center">{title}</div>}
                 <div className="text-sm font-medium text-muted-foreground w-10 text-right">
                   {currentStep + 1}/{formSteps.length}
                 </div>
@@ -271,16 +301,17 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                <FormCard options={stepOptions.options} />
+                <FormCard
+                  options={stepOptions.options}
+                  variant={variant}
+                  totalSteps={formSteps.length}
+                />
               </motion.div>
             </AnimatePresence>
 
             {isLastStep && (
               <div className="flex justify-end mt-8">
-                <Button 
-                  onClick={handleFinish} 
-                  disabled={!canFinish}
-                >
+                <Button onClick={handleFinish} disabled={!canFinish}>
                   Finish
                 </Button>
               </div>
