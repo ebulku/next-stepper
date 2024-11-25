@@ -57,6 +57,9 @@ interface OptionCardProps {
   selected?: boolean
   onClick?: () => void
   variant?: 'default' | 'compact'
+  cardClassName?: string
+  imageClassName?: string
+  iconClassName?: string
 }
 
 function OptionCard({
@@ -67,29 +70,48 @@ function OptionCard({
   selected,
   onClick,
   variant = 'default',
+  cardClassName,
+  imageClassName,
+  iconClassName,
 }: OptionCardProps) {
   return (
     <Card
       className={cn(
         'relative overflow-hidden cursor-pointer transition-all hover:ring-2 hover:ring-primary',
-        selected && 'ring-2 ring-primary'
+        selected && 'ring-2 ring-primary',
+        cardClassName
       )}
       onClick={onClick}
     >
       {variant === 'default' ? (
         <>
           {image ? (
-            <div className="relative h-32">
+            <div className={cn('relative h-32', imageClassName)}>
               <Image src={image} alt={title} fill className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0" />
               {Icon && (
-                <Icon className="absolute bottom-3 left-3 h-6 w-6 text-white" />
+                <Icon
+                  className={cn(
+                    'absolute bottom-3 left-3 h-6 w-6 text-white',
+                    iconClassName
+                  )}
+                />
               )}
             </div>
           ) : (
             Icon && (
-              <div className="flex items-center justify-center h-32 bg-muted">
-                <Icon className="h-12 w-12 text-muted-foreground" />
+              <div
+                className={cn(
+                  'flex items-center justify-center h-32 bg-muted',
+                  imageClassName
+                )}
+              >
+                <Icon
+                  className={cn(
+                    'h-12 w-12 text-muted-foreground',
+                    iconClassName
+                  )}
+                />
               </div>
             )
           )}
@@ -106,13 +128,23 @@ function OptionCard({
             <h3 className="font-semibold text-center">{title}</h3>
           </div>
           {image ? (
-            <div className="relative h-48">
+            <div className={cn('relative h-48', imageClassName)}>
               <Image src={image} alt={title} fill className="object-cover" />
             </div>
           ) : (
             Icon && (
-              <div className="flex items-center justify-center h-32 bg-muted">
-                <Icon className="h-12 w-12 text-muted-foreground" />
+              <div
+                className={cn(
+                  'flex items-center justify-center h-32 bg-muted',
+                  imageClassName
+                )}
+              >
+                <Icon
+                  className={cn(
+                    'h-12 w-12 text-muted-foreground',
+                    iconClassName
+                  )}
+                />
               </div>
             )
           )}
@@ -126,9 +158,19 @@ interface FormCardProps {
   options: FormItem[]
   variant?: 'default' | 'compact'
   totalSteps: number
+  cardClassName?: string
+  imageClassName?: string
+  iconClassName?: string
 }
 
-function FormCard({ options, variant = 'default', totalSteps }: FormCardProps) {
+function FormCard({
+  options,
+  variant = 'default',
+  totalSteps,
+  cardClassName,
+  imageClassName,
+  iconClassName,
+}: FormCardProps) {
   const currentStep = useFormStore((state) => state.currentStep)
   const selections = useFormStore((state) => state.selections)
   const setSelection = useFormStore((state) => state.setSelection)
@@ -149,6 +191,9 @@ function FormCard({ options, variant = 'default', totalSteps }: FormCardProps) {
                 selected={selections[currentStep] === option.id}
                 onClick={() => setSelection(currentStep, option.id, totalSteps)}
                 variant={variant}
+                className={cardClassName}
+                imageClassName={imageClassName}
+                iconClassName={iconClassName}
               />
             </div>
           ))}
@@ -165,6 +210,9 @@ function FormCard({ options, variant = 'default', totalSteps }: FormCardProps) {
                 selected={selections[currentStep] === option.id}
                 onClick={() => setSelection(currentStep, option.id, totalSteps)}
                 variant={variant}
+                className={cardClassName}
+                imageClassName={imageClassName}
+                iconClassName={iconClassName}
               />
             </div>
           ))}
@@ -178,6 +226,9 @@ export interface MultiStepFormProps {
   formSteps: FormStep[]
   onComplete?: (selections: Record<number, string>) => void
   className?: string
+  cardClassName?: string
+  imageClassName?: string
+  iconClassName?: string
   title?: React.ReactNode
   variant?: 'default' | 'compact'
   ref?: React.Ref<HTMLDivElement>
@@ -189,6 +240,9 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
       formSteps,
       onComplete,
       className = '',
+      cardClassName,
+      imageClassName,
+      iconClassName,
       title,
       variant = 'default',
       ...props
@@ -305,6 +359,9 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
                   options={stepOptions.options}
                   variant={variant}
                   totalSteps={formSteps.length}
+                  cardClassName={cardClassName}
+                  imageClassName={imageClassName}
+                  iconClassName={iconClassName}
                 />
               </motion.div>
             </AnimatePresence>
