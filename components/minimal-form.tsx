@@ -5,19 +5,14 @@ import {
   BoxIcon,
   BoxesIcon,
   CloudIcon,
-  Code2Icon,
   CodeIcon,
   GlobeIcon,
   LayersIcon,
   PencilIcon,
   ServerIcon,
 } from 'lucide-react'
-import { useState } from 'react'
-import { toast } from 'sonner'
 
-import { Label } from '@/components/ui/label'
 import MultiStepForm, { type FormStep } from '@/components/ui/multi-step-form'
-import { Switch } from '@/components/ui/switch'
 
 const formSteps: FormStep[] = [
   {
@@ -181,58 +176,12 @@ const formSteps: FormStep[] = [
   },
 ]
 
-export default function FormContainer() {
-  const [isCompact, setIsCompact] = useState(false)
-
+export default function MinimalForm() {
   const handleComplete = (selections: Record<string | number, string>) => {
-    const selectedItems = formSteps
-      .map((step, index) => {
-        const selectedItem = step.items.find(
-          (item) => item.id === selections[index]
-        )
-        return {
-          [step.id]: selectedItem?.id,
-        }
-      })
-      .reduce((acc, curr) => ({ ...acc, ...curr }), {})
-
-    toast('Form completed!', {
-      description: (
-        <pre className="mt-2 p-4 bg-muted rounded-lg overflow-auto">
-          <code className="text-sm">
-            {JSON.stringify(selectedItems, null, 2)}
-          </code>
-        </pre>
-      ),
-    })
-
+    // handle form completion
+    console.log(selections)
     return true
   }
 
-  return (
-    <div className="container mx-auto">
-      <MultiStepForm
-        title={
-          <div className="flex items-center justify-between w-full flex-col space-y-4">
-            <div className="flex items-center gap-2">
-              <Code2Icon className="h-6 w-6" />
-              <span className="font-semibold">Next Vista</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Label className="text-sm font-medium">Default</Label>
-              <Switch
-                id="compact-mode"
-                checked={isCompact}
-                onCheckedChange={setIsCompact}
-              />
-              <Label className="text-sm font-medium">Compact</Label>
-            </div>
-          </div>
-        }
-        formSteps={formSteps}
-        onComplete={handleComplete}
-        variant={isCompact ? 'compact' : 'default'}
-      />
-    </div>
-  )
+  return <MultiStepForm formSteps={formSteps} onComplete={handleComplete} />
 }
