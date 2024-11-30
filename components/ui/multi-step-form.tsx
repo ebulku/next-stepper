@@ -90,7 +90,7 @@ const OptionCard = React.forwardRef<HTMLDivElement, OptionCardProps>(
       <Card
         ref={ref}
         className={cn(
-          'relative overflow-hidden cursor-pointer transition-all hover:ring-2 hover:ring-primary',
+          'relative overflow-hidden cursor-pointer transition-all hover:ring-2 hover:ring-primary h-full',
           selected && 'ring-2 ring-primary',
           cardClassName
         )}
@@ -99,7 +99,7 @@ const OptionCard = React.forwardRef<HTMLDivElement, OptionCardProps>(
         {variant === 'default' ? (
           <>
             {image ? (
-              <div className={cn('relative h-32', imageClassName)}>
+              <div className={cn('relative h-32 md:h-44', imageClassName)}>
                 <Image src={image} alt={title} fill className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/0" />
                 {Icon && (
@@ -115,7 +115,7 @@ const OptionCard = React.forwardRef<HTMLDivElement, OptionCardProps>(
               Icon && (
                 <div
                   className={cn(
-                    'flex items-center justify-center h-32 bg-muted',
+                    'flex items-center justify-center h-32 md:h-44 bg-muted',
                     imageClassName
                   )}
                 >
@@ -141,8 +141,13 @@ const OptionCard = React.forwardRef<HTMLDivElement, OptionCardProps>(
               <h3 className="font-semibold text-center">{title}</h3>
             </div>
             {image ? (
-              <div className={cn('relative h-48', imageClassName)}>
-                <Image src={image} alt={title} fill className="object-cover" />
+              <div className="relative h-32 md:h-44">
+                <Image
+                  src={image}
+                  alt={title}
+                  fill
+                  className={cn('object-cover', imageClassName)}
+                />
               </div>
             ) : (
               Icon && (
@@ -216,7 +221,7 @@ const FormCard = React.forwardRef<HTMLDivElement, FormCardProps>(
     )
 
     return (
-      <div className="space-y-2" ref={ref}>
+      <div ref={ref}>
         {visualOptions.length > 0 && (
           <div className="flex flex-wrap justify-center">
             {visualOptions.map((option) => (
@@ -388,15 +393,12 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
     return (
       <div
         ref={ref}
-        className={cn(
-          'flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4',
-          className
-        )}
+        className={cn('flex flex-col items-center bg-gray-50', className)}
         {...props}
       >
-        <div className="w-full max-w-5xl">
-          <Card className="w-full mx-auto p-6 shadow-lg min-h-[800px] md:min-h-[600px]">
-            <div className="mb-8">
+        <div className="w-full max-w-5xl p-2 min-h-screen h-screen">
+          <Card className="w-full mx-auto p-6 shadow-lg p-2 md:p-6 h-full">
+            <div className="mb-8 p-4 md:p-0">
               <div className="flex items-center justify-between mb-4">
                 <div className="w-20">
                   {currentStep > 0 ? (
@@ -453,7 +455,7 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.15 }}
-                className="h-full"
+                // className="h-full"
               >
                 {showSuccess ? (
                   finalStep
