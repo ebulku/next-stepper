@@ -12,9 +12,10 @@ import {
   PencilIcon,
   ServerIcon,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import MultiStepForm, { type FormStep } from '@/components/ui/multi-step-form'
 import { Switch } from '@/components/ui/switch'
@@ -181,20 +182,34 @@ const formSteps: FormStep[] = [
   },
 ]
 
-export default function FormContainer() {
+export default function ExtendedForm() {
   const [isCompact, setIsCompact] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null)
 
-  const handleComplete = (selections: Record<number, string>) => {
-    const selectedItems = formSteps
-      .map((step, index) => {
-        const selectedItem = step.items.find(
-          (item) => item.id === selections[index]
-        )
-        return {
-          [step.id]: selectedItem?.id,
-        }
-      })
-      .reduce((acc, curr) => ({ ...acc, ...curr }), {})
+  const handleComplete = (selections: Record<string | number, string>) => {
+    if (formRef.current) {
+      const isValid = formRef.current.checkValidity()
+      if (!isValid) {
+        formRef.current.reportValidity()
+        return false
+      }
+    }
+
+    const selectedItems = {
+      ...formSteps
+        .map((step, index) => {
+          const selectedItem = step.items.find(
+            (item) => item.id === selections[index]
+          )
+          return {
+            [step.id]: selectedItem?.id,
+          }
+        })
+        .reduce((acc, curr) => ({ ...acc, ...curr }), {}),
+      // Add form inputs if they exist
+      ...(selections.name ? { name: selections.name } : {}),
+      ...(selections.email ? { email: selections.email } : {}),
+    }
 
     toast('Form completed!', {
       description: (
@@ -205,32 +220,63 @@ export default function FormContainer() {
         </pre>
       ),
     })
+
+    return true
   }
 
   return (
-    <div className="container mx-auto">
-      <MultiStepForm
-        title={
-          <div className="flex items-center justify-between w-full flex-col space-y-4">
-            <div className="flex items-center gap-2">
-              <Code2Icon className="h-6 w-6" />
-              <span className="font-semibold">Next Vista</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Label className="text-sm font-medium">Default</Label>
-              <Switch
-                id="compact-mode"
-                checked={isCompact}
-                onCheckedChange={setIsCompact}
-              />
-              <Label className="text-sm font-medium">Compact</Label>
-            </div>
+    <MultiStepForm
+      title={
+        <div className="flex items-center justify-between w-full flex-col space-y-4">
+          <div className="flex items-center gap-2">
+            <Code2Icon className="h-6 w-6" />
+            <span className="font-semibold">Next Vista</span>
           </div>
-        }
-        formSteps={formSteps}
-        onComplete={handleComplete}
-        variant={isCompact ? 'compact' : 'default'}
-      />
-    </div>
+          <div className="flex items-center space-x-2">
+            <Label className="text-sm font-medium">Default</Label>
+            <Switch
+              id="compact-mode"
+              checked={isCompact}
+              onCheckedChange={setIsCompact}
+            />
+            <Label className="text-sm font-medium">Compact</Label>
+          </div>
+        </div>
+      }
+      formSteps={formSteps}
+      onComplete={handleComplete}
+      variant={isCompact ? 'compact' : 'default'}
+      imageClassName="grayscale hover:grayscale-0"
+      cardClassName="pb-2"
+      finalStep={
+        <div className="flex items-center gap-2">
+          <span className="font-semibold">Thank you for trying</span>
+          <Code2Icon className="h-5 w-5" />
+          <span className="font-semibold">Next-Stepper</span>
+        </div>
+      }
+    >
+      <form ref={formRef} className="space-y-4 p-4 border rounded-lg">
+        <div className="space-y-2">
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
+            name="name"
+            required={true}
+            placeholder="Enter your name"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            required={true}
+            placeholder="Enter your email"
+          />
+        </div>
+      </form>
+    </MultiStepForm>
   )
 }

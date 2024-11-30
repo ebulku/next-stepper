@@ -5,7 +5,7 @@ A dynamic multi-step form built with **Next.js** and styled using [shadcn/ui](ht
 ## Preview
 
 <div align="center">
-  <img src="https://api.microlink.io/?url=https%3A%2F%2Fnext-stepper.vercel.app%2F&overlay.browser=dark&overlay.background=linear-gradient%28225deg%2C+%23FF057C+0%25%2C+%238D0B93+50%25%2C+%23321575+100%25%29&screenshot=true&embed=screenshot.url" alt="Home Page" style="max-width: 100%;" >
+  <img src="https://api.microlink.io/?url=https://next-stepper.vercel.app/extended&screenshot=true&meta=false&embed=screenshot.url&type=jpeg&overlay.browser=dark&overlay.background=linear-gradient%28225deg%2C+%23FF057C+0%25%2C+%238D0B93+50%25%2C+%23321575+100%25%29" alt="Home Page" style="max-width: 100%;" >
 </div>
 
 ## Features
@@ -71,87 +71,9 @@ export default function FormContainer() {
 
 ### Complete Implementation Example
 
-```tsx
-import { Code2Icon, GlobeIcon, CodeIcon } from 'lucide-react'
-import MultiStepForm from '@/components/ui/multi-step-form'
-import { toast } from "sonner"
+Check out our live interactive demo to see the form in action, and explore our comprehensive implementation example in the extended form component.
 
-const formSteps = [
-  {
-    id: 'project-type',
-    title: 'Select Your Project Type',
-    description: 'What type of project are you working on?',
-    items: [
-      {
-        id: 'custom',
-        title: 'Custom',
-        description: 'This is a Card with no image or icon',
-        validNextSteps: ['nextjs', 'astro', 'remix']
-      },
-      {
-        id: 'webapp',
-        title: 'Web Application',
-        description: 'This is a Card with only icon',
-        icon: CodeIcon,
-        validNextSteps: ['nextjs', 'remix']
-      },
-      {
-        id: 'website',
-        title: 'Website',
-        description: 'Card with icon & image',
-        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop',
-        icon: GlobeIcon,
-        validNextSteps: ['nextjs', 'astro']
-      }
-    ]
-  },
-  {
-    id: 'framework',
-    title: 'Choose Your Framework',
-    description: 'Select a framework for your project',
-    items: [
-      {
-        id: 'nextjs',
-        title: 'Next.js',
-        description: 'React framework with hybrid static & server rendering',
-        icon: CodeIcon
-      },
-      {
-        id: 'astro',
-        title: 'Astro',
-        description: 'Static site builder with island architecture',
-        icon: GlobeIcon
-      },
-      {
-        id: 'remix',
-        title: 'Remix',
-        description: 'Full stack web framework',
-        icon: CodeIcon
-      }
-    ]
-  }
-]
-
-export default function FormContainer() {
-  const handleComplete = (selections: Record<number, string>) => {
-    // handel form completion
-  }
-
-  return (
-    <MultiStepForm
-      formSteps={formSteps}
-      title={
-        <div className="flex items-center gap-2">
-          <Code2Icon className="h-6 w-6" />
-          <span className="text-xl font-semibold">Project Setup Wizard</span>
-        </div>
-      }
-      onComplete={handleComplete}
-    />
-  )
-}
-```
-
+[Demo](https://next-stepper.vercel.app/extended) | [extended-form.tsx](components/extended-form.tsx)
 
 ## Packages
 
@@ -161,6 +83,17 @@ export default function FormContainer() {
 - [Zustand](https://zustand-demo.pmnd.rs/) - Lightweight state management
 - [Lucide React](https://lucide.dev/) - Beautiful icons
 - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS
+
+## TODO
+- [x] Demo implementation
+- [x] Add compact pre-built template
+- [x] Add an optional form completion summary
+- [x] Add optional custom form input in the end step
+- [ ] Add optional multi-step form with different imput types
+- [ ] Implement form validation schemas
+- [ ] Add more customization options for step cards
+- [ ] Create more pre-built templates
+- [ ] Support for dynamic step generation
 
 ## Contributing
 
