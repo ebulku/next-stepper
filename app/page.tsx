@@ -1,4 +1,7 @@
-import { ClipboardCheck, ClipboardList } from 'lucide-react'
+'use client'
+
+import { ClipboardCheck, ClipboardList, MoonStar } from 'lucide-react'
+import { useTheme } from 'next-themes'
 import Link from 'next/link'
 
 import {
@@ -9,6 +12,8 @@ import {
 } from '@/components/ui/card'
 
 export default function Home() {
+  const { theme, setTheme } = useTheme()
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-8 flex items-center">
       <div className="max-w-lg mx-auto space-y-6 w-full">
@@ -43,6 +48,20 @@ export default function Home() {
             </CardHeader>
           </Card>
         </Link>
+        <Card
+          className="hover:shadow-lg transition-shadow cursor-pointer"
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        >
+          <CardHeader>
+            <div className="flex items-center space-x-4">
+              <MoonStar className="w-8 h-8 text-primary" />
+              <div>
+                <CardTitle>Theme Mode</CardTitle>
+                <CardDescription>Change theme mode</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
       </div>
     </main>
   )

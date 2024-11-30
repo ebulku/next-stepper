@@ -393,7 +393,7 @@ const MultiStepForm = React.forwardRef<HTMLDivElement, MultiStepFormProps>(
     return (
       <div
         ref={ref}
-        className={cn('flex flex-col items-center bg-gray-50', className)}
+        className={cn('flex flex-col items-center', className)}
         {...props}
       >
         <div className="w-full max-w-5xl p-2 min-h-screen h-screen">
